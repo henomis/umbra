@@ -12,6 +12,8 @@ import (
 	"github.com/henomis/umbra/umbra"
 )
 
+const version = "0.0.1-alpha.2"
+
 func main() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -22,6 +24,14 @@ func main() {
 var rootCmd = &cobra.Command{
 	Use:   "umbra",
 	Short: "Umbra securely split, encrypt, and redundantly store files across pluggable providers via CLI.",
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print the version number",
+	Run: func(_ *cobra.Command, _ []string) {
+		fmt.Println(version)
+	},
 }
 
 /*
@@ -225,6 +235,7 @@ func init() {
 	//nolint:errcheck // MarkFlagRequired only errors if flag doesn't exist, which is impossible here
 	infoCmd.MarkFlagRequired("password")
 
+	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(infoCmd)
 	rootCmd.AddCommand(uploadCmd)
 	rootCmd.AddCommand(downloadCmd)

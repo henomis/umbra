@@ -1,5 +1,5 @@
 BINARY ?= umbra
-CMD ?= ./cmd
+CMD ?= ./cmd/umbra
 GOFILES := $(shell find . -name '*.go' -not -path './vendor/*')
 
 .PHONY: help build run test fmt vet tidy clean install
