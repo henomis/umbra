@@ -65,6 +65,10 @@ func (u *Umbra) Download(ctx context.Context) error {
 		return ErrOutputFileHashMismatch
 	}
 
+	if !u.config.Quiet {
+		fmt.Printf("✅ Download completed. Output file: '%s'\n", u.config.Download.OutputFilePath)
+	}
+
 	return nil
 }
 

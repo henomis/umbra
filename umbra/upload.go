@@ -60,7 +60,7 @@ func (u *Umbra) Upload(ctx context.Context) error {
 	expire := u.getProviderMinExpireDuration()
 
 	if !u.config.Quiet {
-		fmt.Println("Upload completed", "manifest", u.config.ManifestPath, "expires in", expire.String())
+		fmt.Printf("✅ Upload completed. Manifest: '%s', expires in: %s\n", u.config.ManifestPath, expire.String())
 	}
 
 	return nil
