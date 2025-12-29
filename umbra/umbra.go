@@ -31,7 +31,7 @@ func New(config *config.Config) (*Umbra, error) {
 		return nil, err
 	}
 
-	if config.Copies > len(u.providers) {
+	if config.Upload != nil && config.Upload.Copies > len(u.providers) {
 		return nil, ErrCopiesExceedProviders
 	}
 

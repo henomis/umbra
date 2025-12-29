@@ -45,7 +45,7 @@ func (m *Manifest) Version() uint32 {
 	return m.header.Version
 }
 
-// cryptoParameters returns the crypto parameters used in the manifest.
+// CryptoParameters returns the crypto parameters used in the manifest.
 func (m *Manifest) CryptoParameters() *crypto.Parameters {
 	return m.crypto.Parameters()
 }

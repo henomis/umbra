@@ -44,7 +44,7 @@ func (u *Umbra) Download(ctx context.Context) error {
 	}
 
 	// create output file
-	outputFile, err := os.Create(u.config.OutputFilePath)
+	outputFile, err := os.Create(u.config.Download.OutputFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %w", err)
 	}
@@ -56,7 +56,7 @@ func (u *Umbra) Download(ctx context.Context) error {
 		return fmt.Errorf("failed to extract content: %w", err)
 	}
 
-	outputFileHash, err := fileSHA256(u.config.OutputFilePath)
+	outputFileHash, err := fileSHA256(u.config.Download.OutputFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to compute output file hash: %w", err)
 	}

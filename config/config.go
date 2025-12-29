@@ -2,16 +2,27 @@ package config
 
 // Config holds the configuration for the application.
 type Config struct {
-	ManifestPath   string
-	InputFilePath  string
+	ManifestPath string
+	Password     string
+	Quiet        bool
+	Providers    []string
+	Options      map[string]string
+
+	Upload   *Upload
+	Download *Download
+}
+
+// Upload holds the upload-specific configuration.
+type Upload struct {
+	InputFilePath string
+	ChunkSize     int64
+	Chunks        int
+	Copies        int
+}
+
+// Download holds the download-specific configuration.
+type Download struct {
 	OutputFilePath string
-	ChunkSize      int64
-	Chunks         int
-	Copies         int
-	Password       string
-	Providers      []string
-	Options        map[string]string
-	Quiet          bool
 }
 
 // Validate checks the configuration for validity.
@@ -25,30 +36,33 @@ func (c *Config) Validate() error {
 		return ErrInvalidPassword
 	}
 
-	// Upload-specific validations
-	// if c.InputFilePath != "" {
-	// 	if c.ChunkSize == 0 && c.Chunks == 0 {
-	// 		return ErrInvalidChunkConfig
-	// 	} else if c.ChunkSize > 0 && c.Chunks > 0 {
-	// 		return ErrInvalidChunkConfig
-	// 	}
+	// Mode-specific validations
+	if c.Upload != nil && c.Download != nil {
+		return ErrInvalidMode
+	}
 
-	// 	if c.Copies <= 0 {
-	// 		return ErrInvalidCopies
-	// 	}
-	// }
+	if c.Upload != nil {
+		// Upload-specific validations
+		if c.Upload.InputFilePath == "" {
+			return ErrInvalidInputFilePath
+		}
+		if c.Upload.ChunkSize == 0 && c.Upload.Chunks == 0 {
+			return ErrInvalidChunkConfig
+		} else if c.Upload.ChunkSize != 0 && c.Upload.Chunks != 0 {
+			return ErrInvalidChunkConfig
+		}
 
-	// Download-specific validations
-	// if c.OutputFilePath != "" && c.InputFilePath == "" {
-	// 	// This is a download scenario, no additional validations needed
-	// }
+		if c.Upload.Copies <= 0 {
+			return ErrInvalidCopies
+		}
+	}
 
-	// At least one of InputFilePath or OutputFilePath should be set
-	// if c.InputFilePath == "" && c.OutputFilePath == "" {
-	// 	return ErrInvalidInputFilePath
-	// } else if c.InputFilePath != "" && c.OutputFilePath != "" {
-	// 	return ErrInvalidMode
-	// }
+	if c.Download != nil {
+		// Download-specific validations
+		if c.Download.OutputFilePath == "" {
+			return ErrInvalidOutputFilePath
+		}
+	}
 
 	return nil
 }

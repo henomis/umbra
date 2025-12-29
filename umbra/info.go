@@ -11,6 +11,8 @@ import (
 	"github.com/henomis/umbra/internal/manifest"
 )
 
+// Info orchestrates the manifest reading, decryption setup, and content retrieval
+// for displaying information about the stored content.
 func (u *Umbra) Info(_ context.Context) error {
 	// open manifest file
 	manifestFile, err := os.Open(u.config.ManifestPath)
@@ -38,12 +40,12 @@ func (u *Umbra) Info(_ context.Context) error {
 		return fmt.Errorf("failed to create content from data: %w", err)
 	}
 
-	PrintManifest(manifest, content)
+	printManifest(manifest, content)
 
 	return nil
 }
 
-func PrintManifest(manifest *manifest.Manifest, content *content.Content) {
+func printManifest(manifest *manifest.Manifest, content *content.Content) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 	fmt.Fprintf(w, "Manifest Version:\t%d\n", manifest.Version())

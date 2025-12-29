@@ -76,7 +76,7 @@ func (u *Umbra) createContent(ctx context.Context, size, nChunks, chunkSize int6
 
 	if !u.config.Quiet {
 		bar = u.progress.New(
-			nChunks*int64(u.config.Copies),
+			nChunks*int64(u.config.Upload.Copies),
 			mpb.BarStyle().Rbound("|"),
 			mpb.PrependDecorators(
 				decor.Name("Uploading: ", decor.WC{W: 12}),
@@ -89,7 +89,7 @@ func (u *Umbra) createContent(ctx context.Context, size, nChunks, chunkSize int6
 	}
 
 	// calculate file hash
-	fileHash, err := fileSHA256(u.config.InputFilePath)
+	fileHash, err := fileSHA256(u.config.Upload.InputFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (u *Umbra) createContent(ctx context.Context, size, nChunks, chunkSize int6
 	// create content
 	content := content.New(fileHash, size)
 
-	inputFile, err := os.Open(u.config.InputFilePath)
+	inputFile, err := os.Open(u.config.Upload.InputFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (u *Umbra) createChunk(ctx context.Context, content *content.Content, chunk
 		return err
 	}
 
-	for range u.config.Copies {
+	for range u.config.Upload.Copies {
 		provider, err := u.getUniqueRadomProvider(providers)
 		if err != nil {
 			return err
@@ -167,15 +167,15 @@ func (u *Umbra) createChunk(ctx context.Context, content *content.Content, chunk
 
 // calculateChunkSize determines the chunk size based on configuration and file size.
 func (u *Umbra) calculateChunkSize() (int64, int64, int64, error) {
-	fileInfo, err := os.Stat(u.config.InputFilePath)
+	fileInfo, err := os.Stat(u.config.Upload.InputFilePath)
 	if err != nil {
 		return -1, -1, -1, err
 	}
 
 	fileSize := fileInfo.Size()
-	chunkSize := u.config.ChunkSize
-	if u.config.Chunks > 0 {
-		chunkSize = (fileSize / int64(u.config.Chunks)) + 1
+	chunkSize := u.config.Upload.ChunkSize
+	if u.config.Upload.Chunks > 0 {
+		chunkSize = (fileSize / int64(u.config.Upload.Chunks)) + 1
 	}
 
 	chunks := (fileSize + chunkSize - 1) / chunkSize

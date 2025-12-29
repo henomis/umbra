@@ -82,15 +82,17 @@ var uploadCmd = &cobra.Command{
 	},
 	Run: func(_ *cobra.Command, _ []string) {
 		cfg := &config.Config{
-			InputFilePath: uploadFile,
-			ManifestPath:  manifestPath,
-			Password:      password,
-			ChunkSize:     chunkSize,
-			Chunks:        chunks,
-			Copies:        copies,
-			Providers:     providers,
-			Options:       options,
-			Quiet:         quiet,
+			ManifestPath: manifestPath,
+			Password:     password,
+			Quiet:        quiet,
+			Providers:    providers,
+			Options:      options,
+			Upload: &config.Upload{
+				InputFilePath: uploadFile,
+				ChunkSize:     chunkSize,
+				Chunks:        chunks,
+				Copies:        copies,
+			},
 		}
 
 		umbraInstance, err := umbra.New(cfg)
@@ -140,11 +142,13 @@ var downloadCmd = &cobra.Command{
 	},
 	Run: func(_ *cobra.Command, _ []string) {
 		cfg := &config.Config{
-			ManifestPath:   manifestPath,
-			OutputFilePath: outputFile,
-			Password:       password,
-			Options:        options,
-			Quiet:          quiet,
+			ManifestPath: manifestPath,
+			Password:     password,
+			Quiet:        quiet,
+			Options:      options,
+			Download: &config.Download{
+				OutputFilePath: outputFile,
+			},
 		}
 
 		umbraInstance, err := umbra.New(cfg)
