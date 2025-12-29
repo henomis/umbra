@@ -1,4 +1,4 @@
-![Umbra](./assets/umbra.jpg)
+![Umbra](./assets/umbra-logo.jpg)
 
 # Umbra
 
