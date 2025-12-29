@@ -1,6 +1,6 @@
-# Umbra
-
 ![Umbra](./assets/umbra.jpg)
+
+# Umbra
 
 **Umbra** is a command-line tool that securely splits, encrypts, and redundantly stores files across multiple cloud providers using a zero-knowledge architecture.
 
