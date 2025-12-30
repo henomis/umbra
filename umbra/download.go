@@ -134,8 +134,6 @@ func (u *Umbra) getManifestFromProvider(ctx context.Context) (io.Reader, error) 
 		return nil, err
 	}
 
-	fmt.Println("Downloading manifest from provider:", string(meta))
-
 	data, err := provider.Download(ctx, meta)
 	if err != nil {
 		return nil, err
