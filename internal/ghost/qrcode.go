@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"image"
-	"os"
+	"io"
 
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
@@ -13,8 +13,8 @@ import (
 
 const maxQRBufferSize = 2953
 
-// EncodeToQR generates a QR code image containing the binary data.
-func EncodeToQR(data []byte, path string) error {
+// EncodeToQR generates a QR code image containing the binary data and writes it to the provided io.Writer.
+func EncodeToQR(w io.Writer, data []byte) error {
 	if len(data) > maxQRBufferSize {
 		return fmt.Errorf("data size %d exceeds max QR code capacity of %d bytes", len(data), maxQRBufferSize)
 	}
@@ -34,18 +34,18 @@ func EncodeToQR(data []byte, path string) error {
 		pixelSize = 1024
 	}
 
-	return qr.WriteFile(pixelSize, path)
+	pngBytes, err := qr.PNG(pixelSize)
+	if err != nil {
+		return fmt.Errorf("failed to generate PNG: %w", err)
+	}
+
+	_, err = w.Write(pngBytes)
+	return err
 }
 
-// DecodeFromQR reads a QR code image file and extracts the embedded data.
-func DecodeFromQR(path string) ([]byte, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	img, _, err := image.Decode(file)
+// DecodeFromQR reads a QR code image from io.Reader and extracts the embedded data.
+func DecodeFromQR(r io.Reader) ([]byte, error) {
+	img, _, err := image.Decode(r)
 	if err != nil {
 		return nil, err
 	}

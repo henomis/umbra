@@ -4,10 +4,12 @@ import "slices"
 
 var ghostModes = []string{"image", "qrcode"}
 
+// GhostModes returns the list of supported ghost modes.
 func GhostModes() []string {
 	return ghostModes
 }
 
+// IsValidGhostMode checks if the provided mode is a valid ghost mode.
 func IsValidGhostMode(mode string) bool {
 	return slices.Contains(ghostModes, mode)
 }

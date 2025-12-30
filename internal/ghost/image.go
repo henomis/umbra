@@ -6,9 +6,9 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"math"
 	"math/rand"
-	"os"
 
 	"github.com/auyer/steganography"
 )
@@ -26,8 +26,8 @@ func getRequiredDimensions(dataLen int) int {
 }
 
 // EncodeToImage creates a random noise image based on data size,
-// embeds data, and saves to disk.
-func EncodeToImage(data []byte, path string) error {
+// embeds data, and writes to the provided io.Writer.
+func EncodeToImage(w io.Writer, data []byte) error {
 	side := getRequiredDimensions(len(data))
 
 	// Generate random carrier image
@@ -43,34 +43,21 @@ func EncodeToImage(data []byte, path string) error {
 		}
 	}
 
-	// Prepare the output file
-	outFile, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer outFile.Close()
-
-	// Embed and write to file
+	// Embed and write to writer
 	// auyer/steganography uses the LSB of the RGB channels
 	var buf bytes.Buffer
 	if err := steganography.Encode(&buf, img, data); err != nil {
 		return err
 	}
-	if _, err := buf.WriteTo(outFile); err != nil {
+	if _, err := buf.WriteTo(w); err != nil {
 		return err
 	}
 	return nil
 }
 
-// DecodeFromImage extracts the hidden data from an image file.
-func DecodeFromImage(path string) ([]byte, error) {
-	inFile, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer inFile.Close()
-
-	img, err := png.Decode(bufio.NewReader(inFile))
+// DecodeFromImage extracts the hidden data from an image provided via io.Reader.
+func DecodeFromImage(r io.Reader) ([]byte, error) {
+	img, err := png.Decode(bufio.NewReader(r))
 	if err != nil {
 		return nil, err
 	}

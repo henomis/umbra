@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/vbauerster/mpb/v8"
@@ -19,26 +20,10 @@ import (
 // Download orchestrates the manifest reading, decryption setup, content retrieval, and
 // output file reconstruction for the configured Umbra instance.
 func (u *Umbra) Download(ctx context.Context) error {
-	// read manifest data based on ghost mode
-	var manifestData []byte
-	var err error
-
-	switch u.config.Download.GhostMode {
-	case "image":
-		manifestData, err = ghost.DecodeFromImage(u.config.ManifestPath)
-		if err != nil {
-			return fmt.Errorf("failed to decode manifest from image: %w", err)
-		}
-	case "qrcode":
-		manifestData, err = ghost.DecodeFromQR(u.config.ManifestPath)
-		if err != nil {
-			return fmt.Errorf("failed to decode manifest from qrcode: %w", err)
-		}
-	default:
-		manifestData, err = os.ReadFile(u.config.ManifestPath)
-		if err != nil {
-			return fmt.Errorf("failed to read manifest file: %w", err)
-		}
+	// read manifest data
+	manifestData, err := u.getManifestData()
+	if err != nil {
+		return fmt.Errorf("failed to get manifest data: %w", err)
 	}
 
 	// create crypto and decode manifest
@@ -87,6 +72,38 @@ func (u *Umbra) Download(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (u *Umbra) getManifestData() ([]byte, error) {
+	// read manifest data based on ghost mode
+	var manifestData []byte
+	var err error
+
+	file, err := os.Open(u.config.ManifestPath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	switch u.config.Download.GhostMode {
+	case "image":
+		manifestData, err = ghost.DecodeFromImage(file)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode manifest from image: %w", err)
+		}
+	case "qrcode":
+		manifestData, err = ghost.DecodeFromQR(file)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode manifest from qrcode: %w", err)
+		}
+	default:
+		manifestData, err = io.ReadAll(file)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read manifest file: %w", err)
+		}
+	}
+
+	return manifestData, nil
 }
 
 func (u *Umbra) extractContent(ctx context.Context, content *content.Content, crypto *crypto.Crypto, outputFile *os.File) error {

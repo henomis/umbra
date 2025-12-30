@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
@@ -185,16 +186,40 @@ func (u *Umbra) calculateChunkSize() (int64, int64, int64, error) {
 }
 
 func (u *Umbra) saveManifest(ctx context.Context, data []byte) error {
+	result := bytes.NewBuffer(nil)
+	var err error
+
 	ghostMode := u.config.Upload.GhostMode
-	// Handle traditional ghost modes
 	switch ghostMode {
 	case "image":
-		return ghost.EncodeToImage(data, u.config.ManifestPath)
+		err = ghost.EncodeToImage(result, data)
 	case "qrcode":
-		return ghost.EncodeToQR(data, u.config.ManifestPath)
+		err = ghost.EncodeToQR(result, data)
 	default:
-		return os.WriteFile(u.config.ManifestPath, data, 0644)
+		_, err = result.Write(data)
 	}
+
+	if err != nil {
+		return err
+	}
+
+	if !strings.HasPrefix(u.config.ManifestPath, "provider:") {
+		return os.WriteFile(u.config.ManifestPath, result.Bytes(), 0o644)
+	}
+
+	provider, err := u.getProviderByName(strings.TrimPrefix(u.config.ManifestPath, "provider:"))
+	if err != nil {
+		return err
+	}
+
+	meta, err := provider.Upload(ctx, result.Bytes())
+	if err != nil {
+		return err
+	}
+
+	u.config.ManifestPath += fmt.Sprintf(" (%s)", string(meta))
+
+	return nil
 }
 
 // fileSHA256 computes the SHA-256 hash of the file at the given path and returns
