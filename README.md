@@ -14,6 +14,8 @@ Umbra reimagines file storage by fragmenting files into encrypted chunks and dis
 - **Strong Encryption**: XChaCha20-Poly1305 authenticated encryption with Argon2id key derivation
 - **Redundant Storage**: Configure multiple copies per chunk across different providers
 - **Zero-Knowledge Manifest**: Encrypted metadata reveals nothing without the password
+- **Ghost Modes**: Hide manifest data within images or QR codes for covert storage
+- **Manifest Upload**: Upload manifests directly to storage providers for fully remote storage
 - **Provider Agnostic**: Pluggable architecture supports multiple storage backends
 - **Integrity Verification**: SHA-256 hashing ensures data integrity at chunk and file level
 - **Fail-Safe Design**: Abort on any integrity mismatch to prevent data corruption
@@ -38,6 +40,16 @@ make install
 
 ## Usage
 
+### List Available Providers
+
+Display all available storage providers:
+
+```bash
+umbra providers
+```
+
+This shows the list of built-in providers that can be used for chunk storage or manifest upload.
+
 ### Upload a File
 
 Split and encrypt a file, then distribute chunks across providers:
@@ -52,15 +64,29 @@ umbra upload \
   --providers termbin,clbin
 ```
 
+**Upload manifest to a provider** (instead of saving locally):
+
+```bash
+umbra upload \
+  --file ./secret.tar.gz \
+  --password "your-secure-password" \
+  --manifest "provider:termbin" \
+  --chunks 3 \
+  --copies 2
+```
+
+When using `provider:<name>`, the manifest is uploaded to the specified provider and the URL is displayed.
+
 **Options:**
 
 - `--file, -f`: File to upload (required)
 - `--password, -p`: Encryption password (required)
-- `--manifest, -m`: Path to save the manifest file (required)
+- `--manifest, -m`: Path to save manifest file, or `provider:<name>` to upload to provider (required)
 - `--chunk-size, -s`: Chunk size in bytes (mutually exclusive with --chunks)
 - `--chunks, -c`: Number of chunks to create (default: 3, mutually exclusive with --chunk-size)
 - `--copies, -n`: Number of redundant copies per chunk (default: 1)
 - `--providers, -P`: Comma-separated list of providers (defaults to all available)
+- `--ghost, -g`: Embed manifest in ghost mode - `image` or `qrcode` (optional)
 - `--option, -o`: Provider-specific options as key=value (repeatable)
 - `--quiet, -q`: Suppress progress output
 
@@ -75,11 +101,23 @@ umbra download \
   --file ./secret-restored.tar.gz
 ```
 
+**Download from a provider** (if manifest was uploaded to a provider):
+
+```bash
+umbra download \
+  --manifest "provider:termbin:aHR0cHM6Ly90ZXJtYmluLmNvbS94eHh4" \
+  --password "your-secure-password" \
+  --file ./secret-restored.tar.gz
+```
+
+When using `provider:<provider>:<hash>`, the manifest is downloaded from the specified provider using the hash (base64-encoded metadata).
+
 **Options:**
 
-- `--manifest, -m`: Path to the manifest file (required)
+- `--manifest, -m`: Path to the manifest file, or `provider:<provider>:<hash>` to download from provider (required)
 - `--password, -p`: Decryption password (required)
 - `--file, -f`: Output file path (required)
+- `--ghost, -g`: Decode manifest from ghost mode - `image` or `qrcode` (optional)
 - `--option, -o`: Provider-specific options as key=value (repeatable)
 - `--quiet, -q`: Suppress progress output
 
@@ -93,10 +131,37 @@ umbra info \
   --password "your-secure-password"
 ```
 
+**Display info for a manifest stored on a provider:**
+
+```bash
+umbra info \
+  --manifest "provider:termbin:aHR0cHM6Ly90ZXJtYmluLmNvbS94eHh4" \
+  --password "your-secure-password"
+```
+
 **Options:**
 
-- `--manifest, -m`: Path to the manifest file (required)
+- `--manifest, -m`: Path to the manifest file, or `provider:<provider>:<hash>` to download from provider (required)
 - `--password, -p`: Password to decrypt manifest (required)
+
+### List Providers
+
+View all available storage providers:
+
+```bash
+umbra providers
+```
+
+**Output Example:**
+```
+Available providers:
+  - termbin
+  - clbin
+  - pipfi
+  - pastecnetorg
+```
+
+These providers can be used with `--providers` flag or with manifest upload (`provider:<name>`).
 
 ## How It Works
 
@@ -135,11 +200,40 @@ The manifest file contains all reconstruction information:
 
 Without the password, the manifest reveals **nothing** about file contents, structure, or storage locations.
 
-### 5. Reconstruction
+**Manifest Storage Options:**
+
+- **Local File**: Save to local filesystem (e.g., `--manifest ./secret.umbra`)
+- **Provider Upload**: Upload directly to a storage provider (e.g., `--manifest "provider:termbin"`)
+- **Provider Download**: Download from a storage provider (e.g., `--manifest "provider:termbin:<hash>"`)
+- **Ghost Mode**: Embed in an image or QR code for steganographic storage (see Ghost Modes section)
+
+### 5. Ghost Modes (Steganography)
+
+For covert storage, Umbra can hide the manifest inside innocent-looking images:
+
+- **Image Mode**: Embeds manifest data into a randomly generated noise image using LSB (Least Significant Bit) steganography. The manifest is hidden in the RGB channels of the pixels.
+- **QR Code Mode**: Encodes the manifest as a QR code image (max ~2.9 KB). The data is base64-encoded before embedding.
+
+**Usage:**
+
+```bash
+# Upload with image-based manifest
+umbra upload -f secret.tar.gz -p "password" -m manifest.png --ghost image
+
+# Upload with QR code manifest
+umbra upload -f secret.tar.gz -p "password" -m manifest.png --ghost qrcode
+
+# Download from ghost manifest
+umbra download -m manifest.png -p "password" -f restored.tar.gz --ghost image
+```
+
+Ghost modes provide plausible deniability — the manifest appears as an ordinary image or QR code.
+
+### 6. Reconstruction
 
 Download process:
 
-1. Decrypt manifest using password
+1. Extract and decrypt manifest (from file or ghost image) using password
 2. Fetch chunks from providers (trying redundant copies on failure)
 3. Verify each chunk hash
 4. Reassemble chunks in order

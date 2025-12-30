@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/henomis/umbra/internal/content"
 	"github.com/henomis/umbra/internal/provider"
 )
 
@@ -96,22 +97,26 @@ func (p *Pipfi) Upload(ctx context.Context, payload []byte) (json.RawMessage, er
 
 	url := strings.TrimSpace(string(body))
 
-	meta, err := json.Marshal(url)
+	meta := Meta{
+		URL: url,
+	}
+
+	metaBytes, err := json.Marshal(meta)
 	if err != nil {
 		return nil, err
 	}
 
-	return meta, nil
+	return content.Meta(metaBytes), nil
 }
 
 // Download fetches the data from the URL stored in Meta.
 func (p *Pipfi) Download(ctx context.Context, meta json.RawMessage) ([]byte, error) {
-	var url string
-	if err := json.Unmarshal(meta, &url); err != nil {
+	m := Meta{}
+	if err := json.Unmarshal(meta, &m); err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, m.URL, http.NoBody)
 	if err != nil {
 		return nil, err
 	}

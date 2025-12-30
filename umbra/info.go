@@ -1,6 +1,7 @@
 package umbra
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -14,12 +15,10 @@ import (
 // Info orchestrates the manifest reading, decryption setup, and content retrieval
 // for displaying information about the stored content.
 func (u *Umbra) Info(_ context.Context) error {
-	// open manifest file
-	manifestFile, err := os.Open(u.config.ManifestPath)
+	manifestData, err := u.getManifestData(context.Background())
 	if err != nil {
-		return fmt.Errorf("failed to open manifest file: %w", err)
+		return fmt.Errorf("failed to get manifest data: %w", err)
 	}
-	defer manifestFile.Close()
 
 	// create crypto and decode manifest
 	crypto, err := crypto.New([]byte(u.config.Password))
@@ -29,7 +28,7 @@ func (u *Umbra) Info(_ context.Context) error {
 
 	// decode manifest
 	manifest := manifest.New(crypto)
-	contentData, err := manifest.Decode(manifestFile)
+	contentData, err := manifest.Decode(bytes.NewReader(manifestData))
 	if err != nil {
 		return fmt.Errorf("failed to decode manifest: %w", err)
 	}

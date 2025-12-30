@@ -1,5 +1,19 @@
 package config
 
+import "slices"
+
+var ghostModes = []string{"image", "qrcode"}
+
+// GhostModes returns the list of supported ghost modes.
+func GhostModes() []string {
+	return ghostModes
+}
+
+// IsValidGhostMode checks if the provided mode is a valid ghost mode.
+func IsValidGhostMode(mode string) bool {
+	return slices.Contains(ghostModes, mode)
+}
+
 // Config holds the configuration for the application.
 type Config struct {
 	ManifestPath string
@@ -7,6 +21,7 @@ type Config struct {
 	Quiet        bool
 	Providers    []string
 	Options      map[string]string
+	GhostMode    string
 
 	Upload   *Upload
 	Download *Download
@@ -55,12 +70,20 @@ func (c *Config) Validate() error {
 		if c.Upload.Copies <= 0 {
 			return ErrInvalidCopies
 		}
+
+		if c.GhostMode != "" && !IsValidGhostMode(c.GhostMode) {
+			return ErrInvalidGhostMode
+		}
 	}
 
 	if c.Download != nil {
 		// Download-specific validations
 		if c.Download.OutputFilePath == "" {
 			return ErrInvalidOutputFilePath
+		}
+
+		if c.GhostMode != "" && !IsValidGhostMode(c.GhostMode) {
+			return ErrInvalidGhostMode
 		}
 	}
 
