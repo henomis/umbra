@@ -1,5 +1,17 @@
 package config
 
+import "slices"
+
+var ghostModes = []string{"image", "qrcode"}
+
+func GhostModes() []string {
+	return ghostModes
+}
+
+func IsValidGhostMode(mode string) bool {
+	return slices.Contains(ghostModes, mode)
+}
+
 // Config holds the configuration for the application.
 type Config struct {
 	ManifestPath string
@@ -57,12 +69,20 @@ func (c *Config) Validate() error {
 		if c.Upload.Copies <= 0 {
 			return ErrInvalidCopies
 		}
+
+		if c.Upload.GhostMode != "" && !IsValidGhostMode(c.Upload.GhostMode) {
+			return ErrInvalidGhostMode
+		}
 	}
 
 	if c.Download != nil {
 		// Download-specific validations
 		if c.Download.OutputFilePath == "" {
 			return ErrInvalidOutputFilePath
+		}
+
+		if c.Download.GhostMode != "" && !IsValidGhostMode(c.Download.GhostMode) {
+			return ErrInvalidGhostMode
 		}
 	}
 

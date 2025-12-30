@@ -11,4 +11,5 @@ var (
 	ErrInvalidCopies         = fmt.Errorf("copies must be a positive integer")
 	ErrInvalidPassword       = fmt.Errorf("password must not be empty")
 	ErrInvalidManifestPath   = fmt.Errorf("manifest path must not be empty")
+	ErrInvalidGhostMode      = fmt.Errorf("invalid ghost mode specified")
 )

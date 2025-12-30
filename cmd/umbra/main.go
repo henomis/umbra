@@ -55,8 +55,6 @@ var (
 	ghostMode    string
 )
 
-var validGhostModes = []string{"image", "qrcode"}
-
 var infoCmd = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
@@ -93,8 +91,8 @@ var uploadCmd = &cobra.Command{
 		options = parsed
 
 		// Validate ghost mode
-		if ghostMode != "" && !isValidGhostMode(ghostMode) {
-			return fmt.Errorf("invalid ghost mode %q: must be one of %v", ghostMode, validGhostModes)
+		if ghostMode != "" && !config.IsValidGhostMode(ghostMode) {
+			return fmt.Errorf("invalid ghost mode %q: must be one of %s", ghostMode, strings.Join(config.GhostModes(), ", "))
 		}
 
 		return nil
@@ -126,15 +124,6 @@ var uploadCmd = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-}
-
-func isValidGhostMode(mode string) bool {
-	for _, valid := range validGhostModes {
-		if mode == valid {
-			return true
-		}
-	}
-	return false
 }
 
 func parseKeyValueOptions(input []string) (map[string]string, error) {
@@ -169,8 +158,8 @@ var downloadCmd = &cobra.Command{
 		options = parsed
 
 		// Validate ghost mode
-		if ghostMode != "" && !isValidGhostMode(ghostMode) {
-			return fmt.Errorf("invalid ghost mode %q: must be one of %v", ghostMode, validGhostModes)
+		if ghostMode != "" && !config.IsValidGhostMode(ghostMode) {
+			return fmt.Errorf("invalid ghost mode %q: must be one of %s", ghostMode, strings.Join(config.GhostModes(), ", "))
 		}
 
 		return nil
@@ -212,7 +201,7 @@ func init() {
 	uploadCmd.Flags().StringSliceVarP(&providers, "providers", "P", []string{}, "specify list of providers to use")
 	uploadCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to save")
 	uploadCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "enable quiet output")
-	uploadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("embed manifest using ghost mode. (%s)", strings.Join(validGhostModes, ", ")))
+	uploadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("embed manifest using ghost mode. (%s)", strings.Join(config.GhostModes(), ", ")))
 
 	// Generic provider options
 	uploadCmd.Flags().StringSliceVarP(
@@ -238,7 +227,7 @@ func init() {
 	downloadCmd.Flags().StringVarP(&password, "password", "p", "", "specify password")
 	downloadCmd.Flags().StringVarP(&outputFile, "file", "f", "", "specify output file path")
 	downloadCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "enable quiet output")
-	downloadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("decode manifest from ghost mode. (%s)", strings.Join(validGhostModes, ", ")))
+	downloadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("decode manifest from ghost mode. (%s)", strings.Join(config.GhostModes(), ", ")))
 
 	downloadCmd.Flags().StringSliceVarP(
 		&rawOptions,
