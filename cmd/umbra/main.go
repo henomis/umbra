@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/henomis/umbra/config"
+	"github.com/henomis/umbra/internal/provider"
 	"github.com/henomis/umbra/umbra"
 )
 
@@ -31,6 +32,18 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number",
 	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println(version)
+	},
+}
+
+var providersCmd = &cobra.Command{
+	Use:     "providers",
+	Aliases: []string{"p"},
+	Short:   "List available storage providers",
+	Run: func(_ *cobra.Command, _ []string) {
+		fmt.Println("Available providers:")
+		for _, p := range provider.DefaultProviders {
+			fmt.Printf("  - %s\n", p)
+		}
 	},
 }
 
@@ -199,7 +212,7 @@ func init() {
 	uploadCmd.Flags().IntVarP(&chunks, "chunks", "c", 3, "specify number of chunks to process")
 	uploadCmd.Flags().IntVarP(&copies, "copies", "n", 1, "specify number of copies per chunk")
 	uploadCmd.Flags().StringSliceVarP(&providers, "providers", "P", []string{}, "specify list of providers to use")
-	uploadCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to save")
+	uploadCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to save or provider:<provider> to upload manifest")
 	uploadCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "enable quiet output")
 	uploadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("embed manifest using ghost mode. (%s)", strings.Join(config.GhostModes(), ", ")))
 
@@ -223,7 +236,7 @@ func init() {
 	/*
 	 * Download flags
 	 */
-	downloadCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to download")
+	downloadCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to read")
 	downloadCmd.Flags().StringVarP(&password, "password", "p", "", "specify password")
 	downloadCmd.Flags().StringVarP(&outputFile, "file", "f", "", "specify output file path")
 	downloadCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "enable quiet output")
@@ -253,6 +266,7 @@ func init() {
 	infoCmd.MarkFlagRequired("password")
 
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(providersCmd)
 	rootCmd.AddCommand(infoCmd)
 	rootCmd.AddCommand(uploadCmd)
 	rootCmd.AddCommand(downloadCmd)
