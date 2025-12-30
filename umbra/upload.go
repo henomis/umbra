@@ -1,6 +1,7 @@
 package umbra
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/henomis/umbra/internal/content"
 	"github.com/henomis/umbra/internal/crypto"
+	"github.com/henomis/umbra/internal/ghost"
 	"github.com/henomis/umbra/internal/manifest"
 	"github.com/henomis/umbra/internal/provider"
 )
@@ -46,15 +48,14 @@ func (u *Umbra) Upload(ctx context.Context) error {
 		return fmt.Errorf("failed to encode content: %w", err)
 	}
 
-	manifestFile, err := os.Create(u.config.ManifestPath)
-	if err != nil {
-		return fmt.Errorf("failed to create manifest file: %w", err)
-	}
-	defer manifestFile.Close()
-
+	manifestData := bytes.NewBuffer(nil)
 	manifest := manifest.New(crypto)
-	if err := manifest.Encode(manifestFile, contentData); err != nil {
+	if err := manifest.Encode(manifestData, contentData); err != nil {
 		return fmt.Errorf("failed to write manifest: %w", err)
+	}
+
+	if err := u.saveManifest(ctx, manifestData.Bytes()); err != nil {
+		return fmt.Errorf("failed to save manifest: %w", err)
 	}
 
 	expire := u.getProviderMinExpireDuration()
@@ -181,6 +182,19 @@ func (u *Umbra) calculateChunkSize() (int64, int64, int64, error) {
 	chunks := (fileSize + chunkSize - 1) / chunkSize
 
 	return chunkSize, chunks, fileSize, nil
+}
+
+func (u *Umbra) saveManifest(ctx context.Context, data []byte) error {
+	ghostMode := u.config.Upload.GhostMode
+	// Handle traditional ghost modes
+	switch ghostMode {
+	case "image":
+		return ghost.EncodeToImage(data, u.config.ManifestPath)
+	case "qrcode":
+		return ghost.EncodeToQR(data, u.config.ManifestPath)
+	default:
+		return os.WriteFile(u.config.ManifestPath, data, 0644)
+	}
 }
 
 // fileSHA256 computes the SHA-256 hash of the file at the given path and returns

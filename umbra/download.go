@@ -1,6 +1,7 @@
 package umbra
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"fmt"
@@ -11,18 +12,34 @@ import (
 
 	"github.com/henomis/umbra/internal/content"
 	"github.com/henomis/umbra/internal/crypto"
+	"github.com/henomis/umbra/internal/ghost"
 	"github.com/henomis/umbra/internal/manifest"
 )
 
 // Download orchestrates the manifest reading, decryption setup, content retrieval, and
 // output file reconstruction for the configured Umbra instance.
 func (u *Umbra) Download(ctx context.Context) error {
-	// open manifest file
-	manifestFile, err := os.Open(u.config.ManifestPath)
-	if err != nil {
-		return fmt.Errorf("failed to open manifest file: %w", err)
+	// read manifest data based on ghost mode
+	var manifestData []byte
+	var err error
+
+	switch u.config.Download.GhostMode {
+	case "image":
+		manifestData, err = ghost.DecodeFromImage(u.config.ManifestPath)
+		if err != nil {
+			return fmt.Errorf("failed to decode manifest from image: %w", err)
+		}
+	case "qrcode":
+		manifestData, err = ghost.DecodeFromQR(u.config.ManifestPath)
+		if err != nil {
+			return fmt.Errorf("failed to decode manifest from qrcode: %w", err)
+		}
+	default:
+		manifestData, err = os.ReadFile(u.config.ManifestPath)
+		if err != nil {
+			return fmt.Errorf("failed to read manifest file: %w", err)
+		}
 	}
-	defer manifestFile.Close()
 
 	// create crypto and decode manifest
 	crypto, err := crypto.New([]byte(u.config.Password))
@@ -32,7 +49,7 @@ func (u *Umbra) Download(ctx context.Context) error {
 
 	// decode manifest
 	manifest := manifest.New(crypto)
-	contentData, err := manifest.Decode(manifestFile)
+	contentData, err := manifest.Decode(bytes.NewReader(manifestData))
 	if err != nil {
 		return fmt.Errorf("failed to decode manifest: %w", err)
 	}

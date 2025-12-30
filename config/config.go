@@ -18,11 +18,13 @@ type Upload struct {
 	ChunkSize     int64
 	Chunks        int
 	Copies        int
+	GhostMode     string
 }
 
 // Download holds the download-specific configuration.
 type Download struct {
 	OutputFilePath string
+	GhostMode      string
 }
 
 // Validate checks the configuration for validity.
