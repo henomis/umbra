@@ -14,7 +14,7 @@ import (
 	"github.com/henomis/umbra/umbra"
 )
 
-const version = "0.0.1-alpha.4"
+const version = "0.0.1"
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
