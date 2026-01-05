@@ -25,6 +25,9 @@ run: build
 test:
 	GO111MODULE=on go test ./...
 
+lint:
+	golangci-lint run ./...
+
 fmt:
 	gofmt -s -w $(GOFILES)
 

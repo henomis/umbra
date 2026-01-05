@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -32,7 +33,8 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number",
 	Run: func(_ *cobra.Command, _ []string) {
-		fmt.Println(version)
+		// something like: go version go1.25.5 linux/amd64
+		fmt.Printf("umbra version %s %s/%s\n", version, runtime.GOOS, runtime.GOARCH)
 	},
 }
 
