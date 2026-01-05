@@ -263,8 +263,11 @@ Each provider has inherent limitations:
 - **Expiration**: Content may expire after 30 days or less (varies by service)
 - **No authentication**: Services are completely anonymous (no accounts, no tracking)
 - **No guarantees**: Free public services with no SLAs or persistence guarantees
+- **Terms of Service**: Each provider has its own terms of use — review them independently
 
 Umbra validates chunk sizes against provider limits before upload and uses redundancy to mitigate expiration risks.
+
+**Important**: Umbra is not affiliated with, endorsed by, or associated with any of the paste service providers. Users are responsible for complying with each provider's terms of service.
 
 ### Default Providers
 
@@ -335,6 +338,7 @@ See [LICENSE](LICENSE) file for details.
 - **Ephemeral providers**: Anonymous paste services may expire or delete data without notice
 - **No guarantees**: Provider availability and data persistence are not guaranteed
 - **Maintain backups**: Always keep additional copies of important files
+- **Provider independence**: Umbra is not affiliated with any paste service providers — users must comply with each provider's terms of service
 
 Umbra repurposes paste services for unintended use cases. While the cryptography is sound, the storage layer is inherently temporary and experimental.
 
