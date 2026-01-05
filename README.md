@@ -247,9 +247,8 @@ Any integrity mismatch causes immediate abort — corrupted data is never delive
 
 - **termbin**: TCP-based paste service (termbin.com)
 - **clbin**: HTTP paste service (clbin.com)
-- **pipfi**: Pipe-based file transfer service
-- **pastecnetorg**: paste.c-net.org integration
-- **dummy**: Local filesystem provider (testing only)
+- **pipfi**: HTTP paste service (p.ip.fi)
+- **pastecnetorg**: HTTP paste service (paste.c-net.org)
 
 ### Provider Constraints
 

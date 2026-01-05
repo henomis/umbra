@@ -1,18 +1,6 @@
 package config
 
-import "slices"
-
-var ghostModes = []string{"image", "qrcode"}
-
-// GhostModes returns the list of supported ghost modes.
-func GhostModes() []string {
-	return ghostModes
-}
-
-// IsValidGhostMode checks if the provided mode is a valid ghost mode.
-func IsValidGhostMode(mode string) bool {
-	return slices.Contains(ghostModes, mode)
-}
+import "github.com/henomis/umbra/internal/ghost"
 
 // Config holds the configuration for the application.
 type Config struct {
@@ -20,8 +8,8 @@ type Config struct {
 	Password     string
 	Quiet        bool
 	Providers    []string
-	Options      map[string]string
-	GhostMode    string
+	// Options      map[string]string // for future use
+	GhostMode string
 
 	Upload   *Upload
 	Download *Download
@@ -71,7 +59,7 @@ func (c *Config) Validate() error {
 			return ErrInvalidCopies
 		}
 
-		if c.GhostMode != "" && !IsValidGhostMode(c.GhostMode) {
+		if c.GhostMode != "" && !ghost.IsValidGhostMode(c.GhostMode) {
 			return ErrInvalidGhostMode
 		}
 	}
@@ -82,7 +70,7 @@ func (c *Config) Validate() error {
 			return ErrInvalidOutputFilePath
 		}
 
-		if c.GhostMode != "" && !IsValidGhostMode(c.GhostMode) {
+		if c.GhostMode != "" && !ghost.IsValidGhostMode(c.GhostMode) {
 			return ErrInvalidGhostMode
 		}
 	}

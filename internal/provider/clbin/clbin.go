@@ -37,7 +37,7 @@ type Meta struct {
 var _ provider.Provider = (*Clbin)(nil)
 
 // New creates a new Clbin provider instance.
-func New(_ provider.Options) *Clbin {
+func New() *Clbin {
 	return &Clbin{
 		baseURL: defaultBaseURL,
 		client: &http.Client{

@@ -21,7 +21,6 @@ type Options = map[string]string
 
 // DefaultProviders is the list of providers used if none are specified in the configuration.
 var DefaultProviders = []string{
-	// "dummy", for testing purposes only
 	"termbin",
 	"clbin",
 	"pipfi",
@@ -30,7 +29,6 @@ var DefaultProviders = []string{
 
 // Provider names.
 const (
-	DUMMY        = "dummy"
 	TERMBIN      = "termbin"
 	CLBIN        = "clbin"
 	PIPFI        = "pipfi"

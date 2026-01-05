@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/henomis/umbra/config"
+	"github.com/henomis/umbra/internal/ghost"
 	"github.com/henomis/umbra/internal/provider"
 	"github.com/henomis/umbra/umbra"
 )
@@ -54,14 +55,14 @@ var providersCmd = &cobra.Command{
  */
 
 var (
-	uploadFile   string
-	password     string
-	chunkSize    int64
-	chunks       int
-	copies       int
-	providers    []string
-	rawOptions   []string
-	options      map[string]string
+	uploadFile string
+	password   string
+	chunkSize  int64
+	chunks     int
+	copies     int
+	providers  []string
+	// rawOptions   []string // for future use.
+	// options      map[string]string // for future use.
 	outputFile   string
 	manifestPath string
 	quiet        bool
@@ -97,16 +98,17 @@ var uploadCmd = &cobra.Command{
 	Aliases: []string{"u"},
 	Short:   "Upload a file",
 	PreRunE: func(_ *cobra.Command, _ []string) error {
-		parsed, err := parseKeyValueOptions(rawOptions)
-		if err != nil {
-			return err
-		}
+		// For future use
+		// parsed, err := parseKeyValueOptions(rawOptions)
+		// if err != nil {
+		// 	return err
+		// }
 
-		options = parsed
+		// options = parsed
 
 		// Validate ghost mode
-		if ghostMode != "" && !config.IsValidGhostMode(ghostMode) {
-			return fmt.Errorf("invalid ghost mode %q: must be one of %s", ghostMode, strings.Join(config.GhostModes(), ", "))
+		if ghostMode != "" && !ghost.IsValidGhostMode(ghostMode) {
+			return fmt.Errorf("invalid ghost mode %q: must be one of %s", ghostMode, strings.Join(ghost.GhostModes(), ", "))
 		}
 
 		return nil
@@ -117,8 +119,8 @@ var uploadCmd = &cobra.Command{
 			Password:     password,
 			Quiet:        quiet,
 			Providers:    providers,
-			Options:      options,
-			GhostMode:    ghostMode,
+			// Options:      options, // for future use
+			GhostMode: ghostMode,
 			Upload: &config.Upload{
 				InputFilePath: uploadFile,
 				ChunkSize:     chunkSize,
@@ -140,19 +142,20 @@ var uploadCmd = &cobra.Command{
 	},
 }
 
-func parseKeyValueOptions(input []string) (map[string]string, error) {
-	result := make(map[string]string)
+// For future use
+// func parseKeyValueOptions(input []string) (map[string]string, error) {
+// 	result := make(map[string]string)
 
-	for _, item := range input {
-		parts := strings.SplitN(item, "=", 2)
-		if len(parts) != 2 || parts[0] == "" {
-			return nil, fmt.Errorf("invalid option %q, expected key=value", item)
-		}
-		result[parts[0]] = parts[1]
-	}
+// 	for _, item := range input {
+// 		parts := strings.SplitN(item, "=", 2)
+// 		if len(parts) != 2 || parts[0] == "" {
+// 			return nil, fmt.Errorf("invalid option %q, expected key=value", item)
+// 		}
+// 		result[parts[0]] = parts[1]
+// 	}
 
-	return result, nil
-}
+// 	return result, nil
+// }
 
 /*
  * =====================
@@ -165,15 +168,16 @@ var downloadCmd = &cobra.Command{
 	Aliases: []string{"d"},
 	Short:   "Download a file using a manifest",
 	PreRunE: func(_ *cobra.Command, _ []string) error {
-		parsed, err := parseKeyValueOptions(rawOptions)
-		if err != nil {
-			return err
-		}
-		options = parsed
+		// For future use
+		// parsed, err := parseKeyValueOptions(rawOptions)
+		// if err != nil {
+		// 	return err
+		// }
+		// options = parsed
 
 		// Validate ghost mode
-		if ghostMode != "" && !config.IsValidGhostMode(ghostMode) {
-			return fmt.Errorf("invalid ghost mode %q: must be one of %s", ghostMode, strings.Join(config.GhostModes(), ", "))
+		if ghostMode != "" && !ghost.IsValidGhostMode(ghostMode) {
+			return fmt.Errorf("invalid ghost mode %q: must be one of %s", ghostMode, strings.Join(ghost.GhostModes(), ", "))
 		}
 
 		return nil
@@ -183,8 +187,8 @@ var downloadCmd = &cobra.Command{
 			ManifestPath: manifestPath,
 			Password:     password,
 			Quiet:        quiet,
-			Options:      options,
-			GhostMode:    ghostMode,
+			// Options:      options, // for future use
+			GhostMode: ghostMode,
 			Download: &config.Download{
 				OutputFilePath: outputFile,
 			},
@@ -215,16 +219,16 @@ func init() {
 	uploadCmd.Flags().StringSliceVarP(&providers, "providers", "P", []string{}, "specify list of providers to use")
 	uploadCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to save or provider:<provider> to upload manifest")
 	uploadCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "enable quiet output")
-	uploadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("embed manifest using ghost mode. (%s)", strings.Join(config.GhostModes(), ", ")))
+	uploadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("embed manifest using ghost mode. (%s)", strings.Join(ghost.GhostModes(), ", ")))
 
-	// Generic provider options
-	uploadCmd.Flags().StringSliceVarP(
-		&rawOptions,
-		"option",
-		"o",
-		[]string{},
-		"provider option in key=value form (repeatable)",
-	)
+	// Generic provider options - for future use
+	// uploadCmd.Flags().StringSliceVarP(
+	// 	&rawOptions,
+	// 	"option",
+	// 	"o",
+	// 	[]string{},
+	// 	"provider option in key=value form (repeatable)",
+	// )
 
 	//nolint:errcheck // MarkFlagRequired only errors if flag doesn't exist, which is impossible here
 	uploadCmd.MarkFlagRequired("file")
@@ -241,15 +245,16 @@ func init() {
 	downloadCmd.Flags().StringVarP(&password, "password", "p", "", "specify password")
 	downloadCmd.Flags().StringVarP(&outputFile, "file", "f", "", "specify output file path")
 	downloadCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "enable quiet output")
-	downloadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("decode manifest from ghost mode. (%s)", strings.Join(config.GhostModes(), ", ")))
+	downloadCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("decode manifest from ghost mode. (%s)", strings.Join(ghost.GhostModes(), ", ")))
 
-	downloadCmd.Flags().StringSliceVarP(
-		&rawOptions,
-		"option",
-		"o",
-		[]string{},
-		"provider option in key=value form (repeatable)",
-	)
+	// Generic provider options - for future use
+	// downloadCmd.Flags().StringSliceVarP(
+	// 	&rawOptions,
+	// 	"option",
+	// 	"o",
+	// 	[]string{},
+	// 	"provider option in key=value form (repeatable)",
+	// )
 
 	//nolint:errcheck // MarkFlagRequired only errors if flag doesn't exist, which is impossible here
 	downloadCmd.MarkFlagRequired("manifest")
@@ -260,7 +265,7 @@ func init() {
 
 	infoCmd.Flags().StringVarP(&manifestPath, "manifest", "m", "", "specify manifest file to read or provider<provider>:<hash> to download from provider")
 	infoCmd.Flags().StringVarP(&password, "password", "p", "", "specify password")
-	infoCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("decode manifest from ghost mode. (%s)", strings.Join(config.GhostModes(), ", ")))
+	infoCmd.Flags().StringVarP(&ghostMode, "ghost", "g", "", fmt.Sprintf("decode manifest from ghost mode. (%s)", strings.Join(ghost.GhostModes(), ", ")))
 
 	//nolint:errcheck // MarkFlagRequired only errors if flag doesn't exist, which is impossible here
 	infoCmd.MarkFlagRequired("manifest")

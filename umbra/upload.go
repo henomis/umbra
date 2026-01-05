@@ -186,15 +186,17 @@ func (u *Umbra) calculateChunkSize() (int64, int64, int64, error) {
 	return chunkSize, chunks, fileSize, nil
 }
 
+// saveManifest saves the manifest data to the configured path, optionally
+// encoding it using ghost mode or uploading it to a provider.
 func (u *Umbra) saveManifest(ctx context.Context, data []byte) error {
 	result := bytes.NewBuffer(nil)
 	var err error
 
 	ghostMode := u.config.GhostMode
 	switch ghostMode {
-	case "image":
+	case ghost.Image:
 		err = ghost.EncodeToImage(result, data)
-	case "qrcode":
+	case ghost.QRCode:
 		err = ghost.EncodeToQR(result, data)
 	default:
 		_, err = result.Write(data)

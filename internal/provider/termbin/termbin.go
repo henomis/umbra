@@ -32,7 +32,7 @@ type Meta struct {
 }
 
 // New creates a new Termbin provider instance.
-func New(_ provider.Options) *Termbin {
+func New() *Termbin {
 	return &Termbin{}
 }
 

@@ -32,7 +32,7 @@ type Meta struct {
 }
 
 // New creates a new Pastecnetorg provider instance.
-func New(_ provider.Options) *Pastecnetorg {
+func New() *Pastecnetorg {
 	return &Pastecnetorg{}
 }
 

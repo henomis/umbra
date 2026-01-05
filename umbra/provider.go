@@ -7,7 +7,6 @@ import (
 
 	"github.com/henomis/umbra/internal/provider"
 	"github.com/henomis/umbra/internal/provider/clbin"
-	"github.com/henomis/umbra/internal/provider/dummy"
 	"github.com/henomis/umbra/internal/provider/pastecnetorg"
 	"github.com/henomis/umbra/internal/provider/pipfi"
 	"github.com/henomis/umbra/internal/provider/termbin"
@@ -24,16 +23,14 @@ func (u *Umbra) buildProviders() error {
 
 	for _, p := range u.config.Providers {
 		switch p {
-		case provider.DUMMY:
-			providers = append(providers, dummy.New(u.config.Options))
 		case provider.TERMBIN:
-			providers = append(providers, termbin.New(u.config.Options))
+			providers = append(providers, termbin.New())
 		case provider.CLBIN:
-			providers = append(providers, clbin.New(u.config.Options))
+			providers = append(providers, clbin.New())
 		case provider.PIPFI:
-			providers = append(providers, pipfi.New(u.config.Options))
+			providers = append(providers, pipfi.New())
 		case provider.PASTECNETORG:
-			providers = append(providers, pastecnetorg.New(u.config.Options))
+			providers = append(providers, pastecnetorg.New())
 		default:
 			return ErrUnknownProvider
 		}

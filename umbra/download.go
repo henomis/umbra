@@ -98,12 +98,12 @@ func (u *Umbra) getManifestData(ctx context.Context) ([]byte, error) {
 	}
 
 	switch u.config.GhostMode {
-	case "image":
+	case ghost.Image:
 		manifestData, err = ghost.DecodeFromImage(data)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode manifest from image: %w", err)
 		}
-	case "qrcode":
+	case ghost.QRCode:
 		manifestData, err = ghost.DecodeFromQR(data)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode manifest from qrcode: %w", err)

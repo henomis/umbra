@@ -37,7 +37,7 @@ type Meta struct {
 }
 
 // New creates a new Pipfi provider instance.
-func New(_ provider.Options) *Pipfi {
+func New() *Pipfi {
 	return &Pipfi{
 		baseURL: defaultBaseURL,
 		client: &http.Client{
