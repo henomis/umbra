@@ -2,8 +2,10 @@ package ghost
 
 import "slices"
 
+// Mode represents the mode of ghost generation.
 type Mode = string
 
+// Supported ghost modes.
 const (
 	Image  Mode = "image"
 	QRCode Mode = "qrcode"
@@ -11,8 +13,8 @@ const (
 
 var ghostModes = []Mode{Image, QRCode}
 
-// GhostModes returns the list of supported ghost modes.
-func GhostModes() []Mode {
+// Modes returns the list of supported ghost modes.
+func Modes() []Mode {
 	return ghostModes
 }
 
